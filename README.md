@@ -1,36 +1,174 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ProductivityHub
+
+A modern personal productivity web app built with Next.js, TypeScript, and PostgreSQL.
+
+## Features
+
+### ✅ Core Features
+
+- **To-Do List & Task Tracking**: Create, edit, delete, and mark tasks as complete with custom tags, deadlines, and progress tracking
+- **Notes Section**: Rich text editor with Markdown support, categorized by folders/tags, and searchable
+- **LeetCode Favorites**: Save and manage favorite coding problems with difficulty filters
+- **ChatGPT Favorites**: Store links to favorite ChatGPT chats with descriptions
+- **Authentication**: Simple login with email/password
+- **Theme Support**: Dark/light theme toggle with custom color schemes
+- **Responsive Design**: Desktop and mobile friendly
+
+### 🎨 UI/UX Features
+
+- Clean and minimalistic design inspired by Notion + Todoist
+- Smooth animations using Framer Motion
+- Modern component library with Radix UI
+- Customizable themes and color schemes
+
+### 📊 Dashboard
+
+- Overview of today's tasks
+- Recently edited notes
+- 3 most recently visited LeetCode problems
+- 3 pinned ChatGPT chats
+- Progress tracking and statistics
+
+## Tech Stack
+
+- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: NextAuth.js
+- **UI Components**: Radix UI, Lucide React
+- **Animations**: Framer Motion
+- **Rich Text**: React Markdown, MDX Editor
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js 18+
+- PostgreSQL database
+- npm or yarn
+
+### Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone <your-repo-url>
+   cd productivity-app
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   Create a `.env` file in the root directory:
+
+   ```env
+   # Database
+   DATABASE_URL="postgresql://username:password@localhost:5432/productivity_db?schema=public"
+
+   # NextAuth
+   NEXTAUTH_URL="http://localhost:3000"
+   NEXTAUTH_SECRET="your-secret-key-here-change-in-production"
+   ```
+
+4. **Set up the database**
+
+   ```bash
+   # Generate Prisma client
+   npx prisma generate
+
+   # Run database migrations
+   npx prisma db push
+
+   # (Optional) Seed the database
+   npx prisma db seed
+   ```
+
+5. **Run the development server**
+
+   ```bash
+   npm run dev
+   ```
+
+6. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+### Database Setup
+
+If you don't have PostgreSQL installed:
+
+1. **Using Docker** (Recommended)
+
+   ```bash
+   docker run --name productivity-postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=productivity_db -p 5432:5432 -d postgres:15
+   ```
+
+2. **Using local PostgreSQL**
+   - Install PostgreSQL on your system
+   - Create a database named `productivity_db`
+   - Update the `DATABASE_URL` in your `.env` file
+
+## Project Structure
+
+```
+productivity-app/
+├── prisma/
+│   └── schema.prisma          # Database schema
+├── src/
+│   ├── app/                   # Next.js 14 app directory
+│   │   ├── api/              # API routes
+│   │   ├── auth/             # Authentication pages
+│   │   ├── dashboard/        # Dashboard page
+│   │   ├── tasks/            # Tasks management
+│   │   ├── notes/            # Notes management
+│   │   ├── leetcode/         # LeetCode favorites
+│   │   └── chatgpt/          # ChatGPT favorites
+│   ├── components/           # Reusable components
+│   │   └── ui/              # UI components
+│   └── lib/                  # Utility functions
+├── public/                   # Static assets
+└── README.md
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Available Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npx prisma studio` - Open Prisma Studio (database GUI)
+- `npx prisma generate` - Generate Prisma client
+- `npx prisma db push` - Push schema changes to database
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Features in Development
 
-## Learn More
+- [ ] Full task CRUD operations
+- [ ] Rich text editor for notes
+- [ ] Advanced filtering and search
+- [ ] Data export/import
+- [ ] Mobile app (React Native)
+- [ ] Collaboration features
+- [ ] API integrations (LeetCode, ChatGPT)
 
-To learn more about Next.js, take a look at the following resources:
+## Contributing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## License
 
-## Deploy on Vercel
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Support
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+If you have any questions or need help setting up the project, please open an issue or contact the maintainers.
+
+---
+
+**ProductivityHub** - Your all-in-one productivity companion 🚀
