@@ -54,11 +54,15 @@ export function LeetCodeEditorModal({
 }: LeetCodeEditorModalProps) {
   const [title, setTitle] = useState('');
   const [link, setLink] = useState('');
-  const [difficulty, setDifficulty] = useState<'EASY' | 'MEDIUM' | 'HARD'>('MEDIUM');
+  const [difficulty, setDifficulty] = useState<'EASY' | 'MEDIUM' | 'HARD'>(
+    'MEDIUM',
+  );
   const [notes, setNotes] = useState('');
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const [extracting, setExtracting] = useState(false);
+  const [autoExtracted, setAutoExtracted] = useState(false);
 
   useEffect(() => {
     if (problem) {
@@ -67,14 +71,54 @@ export function LeetCodeEditorModal({
       setDifficulty(problem.difficulty);
       setNotes(problem.notes || '');
       setTags(problem.tags || []);
+      setAutoExtracted(false);
     } else {
       setTitle('');
       setLink('');
       setDifficulty('MEDIUM');
       setNotes('');
       setTags([]);
+      setAutoExtracted(false);
     }
   }, [problem, isOpen]);
+
+  const extractProblemInfo = async (url: string) => {
+    if (!url.includes('leetcode.com/problems/')) {
+      return;
+    }
+
+    setExtracting(true);
+    try {
+      const baseUrl =
+        typeof window !== 'undefined' ? window.location.origin : '';
+      const response = await fetch(`${baseUrl}/api/leetcode/extract`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTitle(data.title);
+        setDifficulty(data.difficulty);
+        setTags(data.tags);
+        setAutoExtracted(true);
+      }
+    } catch (error) {
+      console.error('Error extracting problem info:', error);
+    } finally {
+      setExtracting(false);
+    }
+  };
+
+  const handleLinkChange = (newLink: string) => {
+    setLink(newLink);
+
+    // Auto-extract when a valid LeetCode URL is entered
+    if (newLink.includes('leetcode.com/problems/') && !problem) {
+      extractProblemInfo(newLink);
+    }
+  };
 
   const handleSave = async () => {
     if (!title.trim() || !link.trim()) return;
@@ -163,126 +207,180 @@ export function LeetCodeEditorModal({
 
           {/* Content */}
           <div className='p-6 space-y-6'>
-            {/* Title */}
+            {/* Link Input - Primary Focus */}
             <div>
               <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-                Problem Title *
-              </label>
-              <Input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder='e.g., Two Sum, Valid Parentheses...'
-                className='h-12 rounded-xl border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:border-blue-500 dark:focus:border-blue-400'
-              />
-            </div>
-
-            {/* Link */}
-            <div>
-              <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-                LeetCode Link *
+                LeetCode Problem URL *
               </label>
               <div className='relative'>
                 <Input
                   value={link}
-                  onChange={(e) => setLink(e.target.value)}
-                  placeholder='https://leetcode.com/problems/...'
-                  className='h-12 rounded-xl border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:border-blue-500 dark:focus:border-blue-400 pr-10'
+                  onChange={(e) => handleLinkChange(e.target.value)}
+                  placeholder='https://leetcode.com/problems/two-sum/'
+                  className='h-12 rounded-xl border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:border-blue-500 dark:focus:border-blue-400 pr-20'
+                  autoFocus
                 />
-                {link && (
-                  <Button
-                    variant='ghost'
-                    size='sm'
-                    onClick={() => window.open(link, '_blank')}
-                    className='absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0'
-                  >
-                    <ExternalLink className='h-4 w-4' />
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* Difficulty */}
-            <div>
-              <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-                Difficulty *
-              </label>
-              <div className='flex gap-2'>
-                {difficultyOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    type='button'
-                    onClick={() => setDifficulty(option.value as any)}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                      difficulty === option.value
-                        ? `${difficultyColors[option.value as keyof typeof difficultyColors].bg} ${difficultyColors[option.value as keyof typeof difficultyColors].text} ${difficultyColors[option.value as keyof typeof difficultyColors].border} border`
-                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Tags */}
-            <div>
-              <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-                Tags
-              </label>
-              <div className='flex items-center gap-2 mb-3'>
-                <div className='flex-1'>
-                  <Input
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder='Add tags (e.g., Array, Hash Table)...'
-                    className='h-10 rounded-xl border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:border-blue-500 dark:focus:border-blue-400'
-                  />
-                </div>
-                <Button
-                  size='sm'
-                  onClick={handleAddTag}
-                  disabled={!tagInput.trim()}
-                  variant='outline'
-                  className='rounded-xl'
-                >
-                  Add
-                </Button>
-              </div>
-
-              {/* Tags Display */}
-              {tags.length > 0 && (
-                <div className='flex items-center gap-2 flex-wrap'>
-                  {tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className='inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 text-sm rounded-full border border-blue-200 dark:border-blue-700'
+                <div className='absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1'>
+                  {extracting && (
+                    <div className='w-4 h-4 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin'></div>
+                  )}
+                  {link && (
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      onClick={() => window.open(link, '_blank')}
+                      className='h-8 w-8 p-0'
                     >
-                      {tag}
-                      <button
-                        onClick={() => handleRemoveTag(tag)}
-                        className='hover:text-red-600 dark:hover:text-red-400 transition-colors'
-                      >
-                        <X className='h-3 w-3' />
-                      </button>
-                    </span>
-                  ))}
+                      <ExternalLink className='h-4 w-4' />
+                    </Button>
+                  )}
                 </div>
-              )}
+              </div>
+              <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+                {extracting
+                  ? '🔄 Extracting problem information...'
+                  : autoExtracted
+                  ? '✅ Problem information extracted automatically!'
+                  : "💡 Paste a LeetCode URL and we'll extract the details automatically"}
+              </p>
             </div>
 
-            {/* Notes */}
+            {/* Auto-extracted Information Display */}
+            {(title || difficulty !== 'MEDIUM' || tags.length > 0) && (
+              <div className='p-4 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200/50 dark:border-blue-700/50'>
+                <h3 className='text-sm font-medium text-gray-700 dark:text-gray-300 mb-3'>
+                  📋 Extracted Information {autoExtracted && '(Auto-detected)'}
+                </h3>
+
+                <div className='space-y-3'>
+                  {/* Title (read-only when auto-extracted) */}
+                  <div>
+                    <label className='block text-xs text-gray-600 dark:text-gray-400 mb-1'>
+                      Problem Title
+                    </label>
+                    <Input
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder='Problem title will appear here...'
+                      className='h-10 text-sm bg-white/50 dark:bg-gray-800/50'
+                      readOnly={autoExtracted}
+                    />
+                  </div>
+
+                  {/* Difficulty (read-only when auto-extracted) */}
+                  <div>
+                    <label className='block text-xs text-gray-600 dark:text-gray-400 mb-1'>
+                      Difficulty
+                    </label>
+                    <div className='flex gap-2'>
+                      {difficultyOptions.map((option) => (
+                        <button
+                          key={option.value}
+                          type='button'
+                          onClick={() =>
+                            !autoExtracted && setDifficulty(option.value as any)
+                          }
+                          disabled={autoExtracted}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                            difficulty === option.value
+                              ? `${
+                                  difficultyColors[
+                                    option.value as keyof typeof difficultyColors
+                                  ].bg
+                                } ${
+                                  difficultyColors[
+                                    option.value as keyof typeof difficultyColors
+                                  ].text
+                                } ${
+                                  difficultyColors[
+                                    option.value as keyof typeof difficultyColors
+                                  ].border
+                                } border`
+                              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                          } ${
+                            autoExtracted ? 'opacity-75 cursor-not-allowed' : ''
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Tags (editable) */}
+                  <div>
+                    <label className='block text-xs text-gray-600 dark:text-gray-400 mb-1'>
+                      Tags{' '}
+                      {autoExtracted && '(Auto-detected, you can add more)'}
+                    </label>
+                    <div className='flex items-center gap-2 mb-2'>
+                      <div className='flex-1'>
+                        <Input
+                          value={tagInput}
+                          onChange={(e) => setTagInput(e.target.value)}
+                          onKeyPress={handleKeyPress}
+                          placeholder='Add additional tags...'
+                          className='h-8 text-xs rounded-lg'
+                        />
+                      </div>
+                      <Button
+                        size='sm'
+                        onClick={handleAddTag}
+                        disabled={!tagInput.trim()}
+                        variant='outline'
+                        className='h-8 px-3 text-xs rounded-lg'
+                      >
+                        Add
+                      </Button>
+                    </div>
+
+                    {/* Tags Display */}
+                    {tags.length > 0 && (
+                      <div className='flex items-center gap-2 flex-wrap'>
+                        {tags.map((tag, index) => (
+                          <span
+                            key={tag}
+                            className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full border ${
+                              autoExtracted &&
+                              index <
+                                tags.length -
+                                  (tags.length - (problem?.tags?.length || 0))
+                                ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 border-green-200 dark:border-green-700'
+                                : 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-700'
+                            }`}
+                          >
+                            {tag}
+                            <button
+                              onClick={() => handleRemoveTag(tag)}
+                              className='hover:text-red-600 dark:hover:text-red-400 transition-colors'
+                            >
+                              <X className='h-3 w-3' />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Notes - Optional */}
             <div>
               <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-                Notes
+                Your Notes (Optional)
               </label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder='Add your notes, approach, time complexity, etc...'
+                placeholder='Add your solution approach, time/space complexity, key insights, or any other notes...'
                 rows={6}
                 className='w-full rounded-xl border border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:border-blue-500 dark:focus:border-blue-400 p-3 text-sm resize-none transition-all duration-300'
               />
+              <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+                💡 Tip: Document your approach, complexity analysis, or key
+                learnings
+              </p>
             </div>
           </div>
         </motion.div>

@@ -62,7 +62,9 @@ export function TaskEditorModal({
 }: TaskEditorModalProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [priority, setPriority] = useState<'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'>('MEDIUM');
+  const [priority, setPriority] = useState<
+    'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
+  >('MEDIUM');
   const [dueDate, setDueDate] = useState('');
   const [progress, setProgress] = useState(0);
   const [tagInput, setTagInput] = useState('');
@@ -74,9 +76,11 @@ export function TaskEditorModal({
       setTitle(task.title);
       setDescription(task.description || '');
       setPriority(task.priority);
-      setDueDate(task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '');
+      setDueDate(
+        task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '',
+      );
       setProgress(task.progress);
-      setTags(task.tags?.map(tag => tag.name) || []);
+      setTags(task.tags?.map((tag) => tag.name) || []);
     } else {
       setTitle('');
       setDescription('');
@@ -218,7 +222,19 @@ export function TaskEditorModal({
                       onClick={() => setPriority(option.value as any)}
                       className={`px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                         priority === option.value
-                          ? `${priorityColors[option.value as keyof typeof priorityColors].bg} ${priorityColors[option.value as keyof typeof priorityColors].text} ${priorityColors[option.value as keyof typeof priorityColors].border} border`
+                          ? `${
+                              priorityColors[
+                                option.value as keyof typeof priorityColors
+                              ].bg
+                            } ${
+                              priorityColors[
+                                option.value as keyof typeof priorityColors
+                              ].text
+                            } ${
+                              priorityColors[
+                                option.value as keyof typeof priorityColors
+                              ].border
+                            } border`
                           : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                       }`}
                     >

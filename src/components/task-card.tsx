@@ -2,7 +2,15 @@
 
 import { motion } from 'framer-motion';
 import { formatDateTime, isOverdue, getDaysUntilDue } from '@/lib/utils';
-import { Edit, Trash2, Calendar, Tag, CheckCircle, Circle, Clock } from 'lucide-react';
+import {
+  Edit,
+  Trash2,
+  Calendar,
+  Tag,
+  CheckCircle,
+  Circle,
+  Clock,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface Task {
@@ -48,7 +56,12 @@ const priorityColors = {
   },
 };
 
-export function TaskCard({ task, onEdit, onDelete, onToggleComplete }: TaskCardProps) {
+export function TaskCard({
+  task,
+  onEdit,
+  onDelete,
+  onToggleComplete,
+}: TaskCardProps) {
   const priorityStyle = priorityColors[task.priority];
   const dueDate = task.dueDate ? new Date(task.dueDate) : null;
   const overdue = dueDate ? isOverdue(dueDate) : false;
@@ -66,8 +79,8 @@ export function TaskCard({ task, onEdit, onDelete, onToggleComplete }: TaskCardP
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
       className={`group p-6 rounded-2xl bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl border border-white/20 dark:border-gray-700/30 shadow-lg shadow-gray-200/50 dark:shadow-gray-900/50 hover:shadow-xl transition-all duration-300 cursor-pointer ${
-        task.completed 
-          ? 'hover:shadow-green-200/30 dark:hover:shadow-green-900/30' 
+        task.completed
+          ? 'hover:shadow-green-200/30 dark:hover:shadow-green-900/30'
           : 'hover:shadow-blue-200/30 dark:hover:shadow-blue-900/30'
       }`}
       onClick={() => onEdit(task)}
@@ -94,14 +107,16 @@ export function TaskCard({ task, onEdit, onDelete, onToggleComplete }: TaskCardP
           </Button>
 
           <div className='flex-1 min-w-0'>
-            <h3 className={`font-semibold text-lg truncate transition-colors ${
-              task.completed 
-                ? 'line-through text-gray-500 dark:text-gray-400' 
-                : 'text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400'
-            }`}>
+            <h3
+              className={`font-semibold text-lg truncate transition-colors ${
+                task.completed
+                  ? 'line-through text-gray-500 dark:text-gray-400'
+                  : 'text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400'
+              }`}
+            >
               {task.title}
             </h3>
-            
+
             <div className='flex items-center gap-2 mt-1 flex-wrap'>
               {/* Priority Badge */}
               <span
@@ -112,23 +127,24 @@ export function TaskCard({ task, onEdit, onDelete, onToggleComplete }: TaskCardP
 
               {/* Due Date */}
               {dueDate && (
-                <div className={`flex items-center gap-1 text-xs ${
-                  overdue 
-                    ? 'text-red-600 dark:text-red-400' 
-                    : daysUntil !== null && daysUntil <= 1
-                    ? 'text-orange-600 dark:text-orange-400'
-                    : 'text-gray-500 dark:text-gray-400'
-                }`}>
+                <div
+                  className={`flex items-center gap-1 text-xs ${
+                    overdue
+                      ? 'text-red-600 dark:text-red-400'
+                      : daysUntil !== null && daysUntil <= 1
+                      ? 'text-orange-600 dark:text-orange-400'
+                      : 'text-gray-500 dark:text-gray-400'
+                  }`}
+                >
                   <Calendar className='h-3 w-3' />
                   <span>
-                    {overdue 
+                    {overdue
                       ? `Overdue by ${Math.abs(daysUntil || 0)} days`
                       : daysUntil === 0
                       ? 'Due today'
                       : daysUntil === 1
                       ? 'Due tomorrow'
-                      : `Due in ${daysUntil} days`
-                    }
+                      : `Due in ${daysUntil} days`}
                   </span>
                 </div>
               )}
@@ -181,7 +197,7 @@ export function TaskCard({ task, onEdit, onDelete, onToggleComplete }: TaskCardP
           <div className='w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2'>
             <div
               className={`h-2 rounded-full transition-all duration-300 ${
-                task.completed 
+                task.completed
                   ? 'bg-gradient-to-r from-green-500 to-emerald-600'
                   : 'bg-gradient-to-r from-blue-500 to-purple-600'
               }`}
