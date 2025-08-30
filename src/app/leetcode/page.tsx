@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Search, Filter, Code2 } from 'lucide-react';
 import { Navigation } from '@/components/navigation';
@@ -18,8 +18,8 @@ interface LeetCodeProblem {
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   notes?: string;
   tags: string[];
-  lastVisited: string;
-  createdAt: string;
+  lastVisited?: string;
+  createdAt?: string;
 }
 
 export default function LeetCodePage() {
@@ -40,13 +40,7 @@ export default function LeetCodePage() {
     }
   }, [status, router]);
 
-  useEffect(() => {
-    if (session?.user) {
-      fetchProblems();
-    }
-  }, [session, searchQuery, selectedDifficulty]);
-
-  const fetchProblems = async () => {
+  const fetchProblems = useCallback(async () => {
     try {
       const params = new URLSearchParams();
       if (searchQuery) params.append('search', searchQuery);
@@ -64,7 +58,13 @@ export default function LeetCodePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchQuery, selectedDifficulty]);
+
+  useEffect(() => {
+    if (session?.user) {
+      fetchProblems();
+    }
+  }, [session, fetchProblems]);
 
   const handleCreateProblem = () => {
     setEditingProblem(null);

@@ -12,12 +12,14 @@ interface ChatGPTChat {
   link: string;
   description?: string;
   isPinned: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface ChatGPTEditorModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (chat: Omit<ChatGPTChat, 'id'> & { id?: string }) => void;
+  onSave: (chat: Omit<ChatGPTChat, 'id'> & { id?: string }) => Promise<void>;
   chat?: ChatGPTChat | null;
 }
 

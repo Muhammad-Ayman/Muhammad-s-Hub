@@ -9,9 +9,9 @@ interface Note {
   id: string;
   title: string;
   content: string;
-  createdAt: string;
-  updatedAt: string;
-  tags?: { id: string; name: string; color: string }[];
+  createdAt?: string;
+  updatedAt?: string;
+  tags?: string[] | { id: string; name: string; color: string }[];
   folder?: { id: string; name: string; color: string } | null;
 }
 
@@ -64,7 +64,9 @@ export function NoteCard({ note, onEdit, onDelete }: NoteCardProps) {
               </div>
             )}
             <span className='text-xs text-gray-500 dark:text-gray-400'>
-              {formatDateTime(new Date(note.updatedAt))}
+              {note.updatedAt
+                ? formatDateTime(new Date(note.updatedAt))
+                : 'Recently'}
             </span>
           </div>
         </div>
@@ -106,19 +108,26 @@ export function NoteCard({ note, onEdit, onDelete }: NoteCardProps) {
       {note.tags && note.tags.length > 0 && (
         <div className='flex items-center gap-2 flex-wrap'>
           <Tag className='h-3 w-3 text-gray-400' />
-          {note.tags.map((tag) => (
-            <span
-              key={tag.id}
-              className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium'
-              style={{
-                backgroundColor: `${tag.color}20`,
-                color: tag.color,
-                border: `1px solid ${tag.color}40`,
-              }}
-            >
-              {tag.name}
-            </span>
-          ))}
+          {note.tags.map((tag, index) => {
+            const isString = typeof tag === 'string';
+            const tagKey = isString ? `${tag}-${index}` : tag.id;
+            const tagName = isString ? tag : tag.name;
+            const tagColor = isString ? '#3B82F6' : tag.color;
+
+            return (
+              <span
+                key={tagKey}
+                className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium'
+                style={{
+                  backgroundColor: `${tagColor}20`,
+                  color: tagColor,
+                  border: `1px solid ${tagColor}40`,
+                }}
+              >
+                {tagName}
+              </span>
+            );
+          })}
         </div>
       )}
     </motion.div>

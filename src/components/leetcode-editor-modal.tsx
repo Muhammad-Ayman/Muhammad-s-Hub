@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, ExternalLink, Tag } from 'lucide-react';
+import { X, Save, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -13,12 +13,16 @@ interface LeetCodeProblem {
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   notes?: string;
   tags: string[];
+  lastVisited?: string;
+  createdAt?: string;
 }
 
 interface LeetCodeEditorModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (problem: Omit<LeetCodeProblem, 'id'> & { id?: string }) => void;
+  onSave: (
+    problem: Omit<LeetCodeProblem, 'id'> & { id?: string },
+  ) => Promise<void>;
   problem?: LeetCodeProblem | null;
 }
 
@@ -278,7 +282,10 @@ export function LeetCodeEditorModal({
                           key={option.value}
                           type='button'
                           onClick={() =>
-                            !autoExtracted && setDifficulty(option.value as any)
+                            !autoExtracted &&
+                            setDifficulty(
+                              option.value as 'EASY' | 'MEDIUM' | 'HARD',
+                            )
                           }
                           disabled={autoExtracted}
                           className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${

@@ -11,8 +11,8 @@ interface ChatGPTChat {
   link: string;
   description?: string;
   isPinned: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface ChatGPTCardProps {
@@ -72,7 +72,12 @@ export function ChatGPTCard({
           </div>
 
           <div className='flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-2'>
-            <span>Updated {formatDateTime(new Date(chat.updatedAt))}</span>
+            <span>
+              Updated{' '}
+              {chat.updatedAt
+                ? formatDateTime(new Date(chat.updatedAt))
+                : 'Recently'}
+            </span>
           </div>
         </div>
 

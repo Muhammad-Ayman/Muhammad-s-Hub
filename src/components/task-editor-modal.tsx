@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, Calendar, Tag, Flag } from 'lucide-react';
+import { X, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -14,13 +14,15 @@ interface Task {
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
   dueDate?: string;
   progress: number;
-  tags?: { id: string; name: string; color: string }[];
+  createdAt?: string;
+  updatedAt?: string;
+  tags?: string[] | { id: string; name: string; color: string }[];
 }
 
 interface TaskEditorModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (task: Omit<Task, 'id'> & { id?: string }) => void;
+  onSave: (task: Omit<Task, 'id'> & { id?: string }) => Promise<void>;
   task?: Task | null;
 }
 
@@ -80,7 +82,10 @@ export function TaskEditorModal({
         task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '',
       );
       setProgress(task.progress);
-      setTags(task.tags?.map((tag) => tag.name) || []);
+      setTags(
+        task.tags?.map((tag) => (typeof tag === 'string' ? tag : tag.name)) ||
+          [],
+      );
     } else {
       setTitle('');
       setDescription('');
@@ -219,7 +224,11 @@ export function TaskEditorModal({
                     <button
                       key={option.value}
                       type='button'
-                      onClick={() => setPriority(option.value as any)}
+                      onClick={() =>
+                        setPriority(
+                          option.value as 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT',
+                        )
+                      }
                       className={`px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                         priority === option.value
                           ? `${

@@ -2,17 +2,9 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import {
-  CheckSquare,
-  FileText,
-  Code,
-  MessageSquare,
-  Calendar,
-  TrendingUp,
-  Plus,
-} from 'lucide-react';
+import { CheckSquare, FileText, Code, TrendingUp, Plus } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -23,14 +15,48 @@ import {
 import { Button } from '@/components/ui/button';
 import { Navigation } from '@/components/navigation';
 
+interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  completed: boolean;
+  priority: 'LOW' | 'MEDIUM' | 'HIGH';
+  dueDate?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Note {
+  id: string;
+  title: string;
+  updatedAt: string;
+}
+
+interface LeetcodeProblem {
+  id: string;
+  title: string;
+  difficulty: string;
+  lastVisited: string;
+  url: string;
+}
+
+interface ChatGPTChat {
+  id: string;
+  title: string;
+  url: string;
+  description?: string;
+  isPinned: boolean;
+  updatedAt: string;
+}
+
 interface DashboardStats {
   totalTasks: number;
   completedTasks: number;
   totalNotes: number;
-  recentLeetcode: any[];
-  pinnedChats: any[];
-  todaysTasks: any[];
-  recentNotes: any[];
+  recentLeetcode: LeetcodeProblem[];
+  pinnedChats: ChatGPTChat[];
+  todaysTasks: Task[];
+  recentNotes: Note[];
 }
 
 export default function DashboardPage() {
@@ -45,13 +71,7 @@ export default function DashboardPage() {
     }
   }, [status, router]);
 
-  useEffect(() => {
-    if (session?.user) {
-      fetchDashboardData();
-    }
-  }, [session]);
-
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       const baseUrl =
         typeof window !== 'undefined' ? window.location.origin : '';
@@ -71,7 +91,13 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    if (session?.user) {
+      fetchDashboardData();
+    }
+  }, [session, fetchDashboardData]);
 
   if (status === 'loading' || loading) {
     return (
@@ -101,7 +127,7 @@ export default function DashboardPage() {
         >
           <div className='mb-8'>
             <h1 className='text-3xl font-bold text-foreground'>
-              Welcome back, {session.user.name || session.user.email}!
+              Welcome back, {session?.user?.name || session?.user?.email}!
             </h1>
             <p className='text-muted-foreground mt-2'>
               Here&apos;s what&apos;s happening with your productivity today.
@@ -225,7 +251,7 @@ export default function DashboardPage() {
                 <CardContent>
                   {stats?.todaysTasks?.length ? (
                     <div className='space-y-3'>
-                      {stats.todaysTasks.slice(0, 5).map((task: any) => (
+                      {stats.todaysTasks.slice(0, 5).map((task: Task) => (
                         <div
                           key={task.id}
                           className='flex items-center space-x-3 p-2 rounded-lg hover:bg-accent/50'
@@ -278,7 +304,7 @@ export default function DashboardPage() {
                 <CardContent>
                   {stats?.recentNotes?.length ? (
                     <div className='space-y-3'>
-                      {stats.recentNotes.slice(0, 5).map((note: any) => (
+                      {stats.recentNotes.slice(0, 5).map((note: Note) => (
                         <div
                           key={note.id}
                           className='p-2 rounded-lg hover:bg-accent/50 cursor-pointer'
@@ -321,27 +347,29 @@ export default function DashboardPage() {
                 <CardContent>
                   {stats?.recentLeetcode?.length ? (
                     <div className='space-y-3'>
-                      {stats.recentLeetcode.slice(0, 3).map((problem: any) => (
-                        <div
-                          key={problem.id}
-                          className='p-2 rounded-lg hover:bg-accent/50'
-                        >
-                          <h4 className='font-medium'>{problem.title}</h4>
-                          <div className='flex items-center space-x-2 mt-1'>
-                            <span
-                              className={`px-2 py-1 rounded text-xs font-medium ${
-                                problem.difficulty === 'EASY'
-                                  ? 'bg-green-100 text-green-800'
-                                  : problem.difficulty === 'MEDIUM'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-red-100 text-red-800'
-                              }`}
-                            >
-                              {problem.difficulty}
-                            </span>
+                      {stats.recentLeetcode
+                        .slice(0, 3)
+                        .map((problem: LeetcodeProblem) => (
+                          <div
+                            key={problem.id}
+                            className='p-2 rounded-lg hover:bg-accent/50'
+                          >
+                            <h4 className='font-medium'>{problem.title}</h4>
+                            <div className='flex items-center space-x-2 mt-1'>
+                              <span
+                                className={`px-2 py-1 rounded text-xs font-medium ${
+                                  problem.difficulty === 'EASY'
+                                    ? 'bg-green-100 text-green-800'
+                                    : problem.difficulty === 'MEDIUM'
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : 'bg-red-100 text-red-800'
+                                }`}
+                              >
+                                {problem.difficulty}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   ) : (
                     <p className='text-muted-foreground text-center py-8'>
@@ -374,17 +402,19 @@ export default function DashboardPage() {
                 <CardContent>
                   {stats?.pinnedChats?.length ? (
                     <div className='space-y-3'>
-                      {stats.pinnedChats.slice(0, 3).map((chat: any) => (
-                        <div
-                          key={chat.id}
-                          className='p-2 rounded-lg hover:bg-accent/50'
-                        >
-                          <h4 className='font-medium'>{chat.title}</h4>
-                          <p className='text-sm text-muted-foreground'>
-                            {chat.description}
-                          </p>
-                        </div>
-                      ))}
+                      {stats.pinnedChats
+                        .slice(0, 3)
+                        .map((chat: ChatGPTChat) => (
+                          <div
+                            key={chat.id}
+                            className='p-2 rounded-lg hover:bg-accent/50'
+                          >
+                            <h4 className='font-medium'>{chat.title}</h4>
+                            <p className='text-sm text-muted-foreground'>
+                              {chat.description}
+                            </p>
+                          </div>
+                        ))}
                     </div>
                   ) : (
                     <p className='text-muted-foreground text-center py-8'>

@@ -31,7 +31,7 @@ export function MarkdownEditor({
         height={height}
         preview='edit'
         hideToolbar={false}
-        data-color-mode='auto'
+        data-color-mode='light'
         textareaProps={{
           placeholder,
           style: {

@@ -1,22 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
+import { Session } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = (await getServerSession(authOptions)) as Session | null;
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const resolvedParams = await params;
+
     const note = await prisma.note.findFirst({
       where: {
-        id: params.id,
+        id: resolvedParams.id,
         userId: session.user.id,
       },
       include: {
@@ -41,21 +44,23 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = (await getServerSession(authOptions)) as Session | null;
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const resolvedParams = await params;
 
     const { title, content, folderId, tags } = await request.json();
 
     // Verify note ownership
     const existingNote = await prisma.note.findFirst({
       where: {
-        id: params.id,
+        id: resolvedParams.id,
         userId: session.user.id,
       },
     });
@@ -65,8 +70,8 @@ export async function PUT(
     }
 
     // Update note
-    const updatedNote = await prisma.note.update({
-      where: { id: params.id },
+    await prisma.note.update({
+      where: { id: resolvedParams.id },
       data: {
         title,
         content,
@@ -103,7 +108,7 @@ export async function PUT(
 
         // Connect tag to note
         await prisma.note.update({
-          where: { id: params.id },
+          where: { id: resolvedParams.id },
           data: {
             tags: {
               connect: { id: tag.id },
@@ -114,7 +119,7 @@ export async function PUT(
     }
 
     const finalNote = await prisma.note.findUnique({
-      where: { id: params.id },
+      where: { id: resolvedParams.id },
       include: {
         tags: true,
         folder: true,
@@ -133,19 +138,21 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = (await getServerSession(authOptions)) as Session | null;
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const resolvedParams = await params;
+
     // Verify note ownership
     const existingNote = await prisma.note.findFirst({
       where: {
-        id: params.id,
+        id: resolvedParams.id,
         userId: session.user.id,
       },
     });
@@ -155,7 +162,7 @@ export async function DELETE(
     }
 
     await prisma.note.delete({
-      where: { id: params.id },
+      where: { id: resolvedParams.id },
     });
 
     return NextResponse.json({ message: 'Note deleted successfully' });

@@ -2,9 +2,9 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Search, Filter, Folder, FileText } from 'lucide-react';
+import { Plus, Search, Folder, FileText } from 'lucide-react';
 import { Navigation } from '@/components/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,9 +15,9 @@ interface Note {
   id: string;
   title: string;
   content: string;
-  createdAt: string;
-  updatedAt: string;
-  tags?: { id: string; name: string; color: string }[];
+  createdAt?: string;
+  updatedAt?: string;
+  tags?: string[] | { id: string; name: string; color: string }[];
   folder?: { id: string; name: string; color: string } | null;
   folderId?: string | null;
 }
@@ -46,14 +46,7 @@ export default function NotesPage() {
     }
   }, [status, router]);
 
-  useEffect(() => {
-    if (session?.user) {
-      fetchNotes();
-      fetchFolders();
-    }
-  }, [session, searchQuery, selectedFolderId]);
-
-  const fetchNotes = async () => {
+  const fetchNotes = useCallback(async () => {
     try {
       const params = new URLSearchParams();
       if (searchQuery) params.append('search', searchQuery);
@@ -71,9 +64,9 @@ export default function NotesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchQuery, selectedFolderId]);
 
-  const fetchFolders = async () => {
+  const fetchFolders = useCallback(async () => {
     try {
       const baseUrl =
         typeof window !== 'undefined' ? window.location.origin : '';
@@ -85,7 +78,14 @@ export default function NotesPage() {
     } catch (error) {
       console.error('Error fetching folders:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (session?.user) {
+      fetchNotes();
+      fetchFolders();
+    }
+  }, [session, fetchNotes, fetchFolders]);
 
   const handleCreateNote = () => {
     setEditingNote(null);

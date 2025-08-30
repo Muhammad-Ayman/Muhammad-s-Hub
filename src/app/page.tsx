@@ -6,13 +6,7 @@ import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+
 import {
   CheckSquare,
   FileText,
@@ -244,7 +238,7 @@ export default function HomePage() {
               </h2>
               <p className='text-xl text-gray-600 dark:text-gray-300 mb-12 max-w-3xl mx-auto font-light leading-relaxed'>
                 Join thousands of users who have transformed their workflow with
-                Muhammad's Hub. Start your journey today.
+                Muhammad&apos;s Hub. Start your journey today.
               </p>
 
               <div className='flex flex-col sm:flex-row gap-6 justify-center items-center'>

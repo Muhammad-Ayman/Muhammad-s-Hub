@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   Plus,
@@ -26,9 +26,9 @@ interface Task {
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
   dueDate?: string;
   progress: number;
-  createdAt: string;
-  updatedAt: string;
-  tags?: { id: string; name: string; color: string }[];
+  createdAt?: string;
+  updatedAt?: string;
+  tags?: string[] | { id: string; name: string; color: string }[];
 }
 
 export default function TasksPage() {
@@ -48,13 +48,7 @@ export default function TasksPage() {
     }
   }, [status, router]);
 
-  useEffect(() => {
-    if (session?.user) {
-      fetchTasks();
-    }
-  }, [session, searchQuery, selectedPriority, showCompleted]);
-
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     try {
       const params = new URLSearchParams();
       if (searchQuery) params.append('search', searchQuery);
@@ -73,7 +67,13 @@ export default function TasksPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchQuery, selectedPriority, showCompleted]);
+
+  useEffect(() => {
+    if (session?.user) {
+      fetchTasks();
+    }
+  }, [session, fetchTasks]);
 
   const handleCreateTask = () => {
     setEditingTask(null);

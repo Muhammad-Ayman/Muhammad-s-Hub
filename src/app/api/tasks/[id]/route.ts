@@ -1,18 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
+import { Session } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions) as Session | null;
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const resolvedParams = await params;
 
     const { title, description, completed, priority, dueDate, progress, tags } =
       await request.json();
@@ -20,7 +23,7 @@ export async function PUT(
     // Verify task ownership
     const existingTask = await prisma.task.findFirst({
       where: {
-        id: params.id,
+        id: resolvedParams.id,
         userId: session.user.id,
       },
     });
@@ -30,8 +33,8 @@ export async function PUT(
     }
 
     // Update task
-    const updatedTask = await prisma.task.update({
-      where: { id: params.id },
+    await prisma.task.update({
+      where: { id: resolvedParams.id },
       data: {
         ...(title !== undefined && { title }),
         ...(description !== undefined && { description }),
@@ -72,7 +75,7 @@ export async function PUT(
 
         // Connect tag to task
         await prisma.task.update({
-          where: { id: params.id },
+          where: { id: resolvedParams.id },
           data: {
             tags: {
               connect: { id: tag.id },
@@ -83,7 +86,7 @@ export async function PUT(
     }
 
     const finalTask = await prisma.task.findUnique({
-      where: { id: params.id },
+      where: { id: resolvedParams.id },
       include: { tags: true },
     });
 
@@ -99,19 +102,21 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions) as Session | null;
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const resolvedParams = await params;
+
     // Verify task ownership
     const existingTask = await prisma.task.findFirst({
       where: {
-        id: params.id,
+        id: resolvedParams.id,
         userId: session.user.id,
       },
     });
@@ -121,7 +126,7 @@ export async function DELETE(
     }
 
     await prisma.task.delete({
-      where: { id: params.id },
+      where: { id: resolvedParams.id },
     });
 
     return NextResponse.json({ message: 'Task deleted successfully' });

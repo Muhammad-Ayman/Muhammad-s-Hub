@@ -1,16 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { formatDateTime, isOverdue, getDaysUntilDue } from '@/lib/utils';
-import {
-  Edit,
-  Trash2,
-  Calendar,
-  Tag,
-  CheckCircle,
-  Circle,
-  Clock,
-} from 'lucide-react';
+import { isOverdue, getDaysUntilDue } from '@/lib/utils';
+import { Edit, Trash2, Calendar, Tag, CheckCircle, Circle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface Task {
@@ -21,9 +13,9 @@ interface Task {
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
   dueDate?: string;
   progress: number;
-  createdAt: string;
-  updatedAt: string;
-  tags?: { id: string; name: string; color: string }[];
+  createdAt?: string;
+  updatedAt?: string;
+  tags?: string[] | { id: string; name: string; color: string }[];
 }
 
 interface TaskCardProps {
@@ -211,19 +203,26 @@ export function TaskCard({
       {task.tags && task.tags.length > 0 && (
         <div className='flex items-center gap-2 flex-wrap'>
           <Tag className='h-3 w-3 text-gray-400' />
-          {task.tags.map((tag) => (
-            <span
-              key={tag.id}
-              className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium'
-              style={{
-                backgroundColor: `${tag.color}20`,
-                color: tag.color,
-                border: `1px solid ${tag.color}40`,
-              }}
-            >
-              {tag.name}
-            </span>
-          ))}
+          {task.tags.map((tag, index) => {
+            const isString = typeof tag === 'string';
+            const tagKey = isString ? `${tag}-${index}` : tag.id;
+            const tagName = isString ? tag : tag.name;
+            const tagColor = isString ? '#3B82F6' : tag.color;
+
+            return (
+              <span
+                key={tagKey}
+                className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium'
+                style={{
+                  backgroundColor: `${tagColor}20`,
+                  color: tagColor,
+                  border: `1px solid ${tagColor}40`,
+                }}
+              >
+                {tagName}
+              </span>
+            );
+          })}
         </div>
       )}
     </motion.div>

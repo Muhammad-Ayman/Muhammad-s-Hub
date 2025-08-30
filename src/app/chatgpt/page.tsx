@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Search, Pin, MessageSquare } from 'lucide-react';
 import { Navigation } from '@/components/navigation';
@@ -17,8 +17,8 @@ interface ChatGPTChat {
   link: string;
   description?: string;
   isPinned: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export default function ChatGPTPage() {
@@ -37,13 +37,7 @@ export default function ChatGPTPage() {
     }
   }, [status, router]);
 
-  useEffect(() => {
-    if (session?.user) {
-      fetchChats();
-    }
-  }, [session, searchQuery, showPinnedOnly]);
-
-  const fetchChats = async () => {
+  const fetchChats = useCallback(async () => {
     try {
       const params = new URLSearchParams();
       if (searchQuery) params.append('search', searchQuery);
@@ -61,7 +55,13 @@ export default function ChatGPTPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchQuery, showPinnedOnly]);
+
+  useEffect(() => {
+    if (session?.user) {
+      fetchChats();
+    }
+  }, [session, fetchChats]);
 
   const handleCreateChat = () => {
     setEditingChat(null);

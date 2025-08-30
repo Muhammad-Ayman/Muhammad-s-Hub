@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, Folder, Tag, Palette } from 'lucide-react';
+import { X, Save, Folder, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { MarkdownEditor } from '@/components/markdown-editor';
@@ -11,8 +11,10 @@ interface Note {
   id?: string;
   title: string;
   content: string;
+  createdAt?: string;
+  updatedAt?: string;
   folderId?: string | null;
-  tags?: { id: string; name: string; color: string }[];
+  tags?: string[] | { id: string; name: string; color: string }[];
   folder?: { id: string; name: string; color: string } | null;
 }
 
@@ -25,7 +27,7 @@ interface Folder {
 interface NoteEditorModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (note: Omit<Note, 'id'> & { id?: string }) => void;
+  onSave: (note: Omit<Note, 'id'> & { id?: string }) => Promise<void>;
   note?: Note | null;
   folders: Folder[];
 }
@@ -49,7 +51,10 @@ export function NoteEditorModal({
       setTitle(note.title);
       setContent(note.content);
       setSelectedFolderId(note.folderId || null);
-      setTags(note.tags?.map((tag) => tag.name) || []);
+      setTags(
+        note.tags?.map((tag) => (typeof tag === 'string' ? tag : tag.name)) ||
+          [],
+      );
     } else {
       setTitle('');
       setContent('');

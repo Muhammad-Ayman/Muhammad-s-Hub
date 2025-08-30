@@ -12,8 +12,8 @@ interface LeetCodeProblem {
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   notes?: string;
   tags: string[];
-  lastVisited: string;
-  createdAt: string;
+  lastVisited?: string;
+  createdAt?: string;
 }
 
 interface LeetCodeCardProps {
@@ -86,7 +86,10 @@ export function LeetCodeCard({ problem, onEdit, onDelete }: LeetCodeCardProps) {
             <div className='flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400'>
               <Calendar className='h-3 w-3' />
               <span>
-                Visited {formatDateTime(new Date(problem.lastVisited))}
+                Visited{' '}
+                {problem.lastVisited
+                  ? formatDateTime(new Date(problem.lastVisited))
+                  : 'Recently'}
               </span>
             </div>
           </div>
