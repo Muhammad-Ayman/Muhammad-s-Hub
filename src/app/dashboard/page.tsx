@@ -53,10 +53,18 @@ export default function DashboardPage() {
 
   const fetchDashboardData = async () => {
     try {
-      const response = await fetch('/api/dashboard');
+      const baseUrl =
+        typeof window !== 'undefined' ? window.location.origin : '';
+      const response = await fetch(`${baseUrl}/api/dashboard`);
       if (response.ok) {
         const data = await response.json();
         setStats(data);
+      } else if (response.status === 401) {
+        console.error('Unauthorized - redirecting to sign in');
+        router.push('/auth/signin');
+        return;
+      } else {
+        console.error('Error response:', await response.text());
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);

@@ -7,8 +7,21 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
+    console.log('Dashboard - Session:', session);
+    console.log('Dashboard - User ID:', session?.user?.id);
+
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json(
+        {
+          error: 'Unauthorized',
+          debug: {
+            hasSession: !!session,
+            hasUser: !!session?.user,
+            userId: session?.user?.id,
+          },
+        },
+        { status: 401 },
+      );
     }
 
     const userId = session.user.id;

@@ -30,7 +30,9 @@ export default function TasksPage() {
 
   const fetchTasks = async () => {
     try {
-      const response = await fetch('/api/tasks');
+      const baseUrl =
+        typeof window !== 'undefined' ? window.location.origin : '';
+      const response = await fetch(`${baseUrl}/api/tasks`);
       if (response.ok) {
         const data = await response.json();
         setTasks(data);
