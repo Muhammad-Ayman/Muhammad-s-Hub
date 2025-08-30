@@ -39,7 +39,7 @@ export function Navigation() {
             </div>
           </div>
           <span className='font-bold text-xl bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent'>
-            ProductivityHub
+            Muhammad's Hub
           </span>
         </Link>
 

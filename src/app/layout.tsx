@@ -7,7 +7,7 @@ import { AuthProvider } from '@/components/session-provider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'ProductivityHub - Your Personal Productivity Assistant',
+  title: 'Muhammad\'s Hub - Your Personal Productivity Assistant',
   description:
     'A modern productivity web app for managing tasks, notes, LeetCode problems, and ChatGPT favorites',
   icons: {
